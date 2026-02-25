@@ -1,5 +1,6 @@
 ---
 title: "Project Dashboard"
+output-file: index.html
 format: 
   dashboard:
     scrolling: true
