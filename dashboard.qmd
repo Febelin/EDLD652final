@@ -141,7 +141,7 @@ age_dist <- analysis_clean |>
 
 p_age <- ggplot(age_dist, aes(x = fct_rev(age), y = n, fill = age)) +
   geom_col() +
-  labs(x = "Count", y = "", title = "Age Distribution") +
+  labs(x = "", y = "Count", title = "Age Distribution") +
   theme_minimal(base_size = 14) +
   theme(legend.position = "none") +
   scale_fill_viridis_d()
@@ -162,7 +162,7 @@ gender_dist <- analysis_clean |>
 
 p_gender <- ggplot(gender_dist, aes(x = gender, y= n, fill = gender)) +
   geom_col() +
-  labs(x = "Count", y = "", title = "Gender Distribution") +
+  labs(x = "", y = "Count", title = "Gender Distribution") +
   theme_minimal(base_size = 14) +
   theme(legend.position = "none") +
   scale_fill_viridis_d(option = "magma")
@@ -183,7 +183,7 @@ geo_dist <- analysis_clean |>
 
 p_geo <- ggplot(geo_dist, aes(x = source, y= n, fill = source)) +
   geom_col() +
-  labs(x = "Count", y = "", title = "Geographic Distribution") +
+  labs(x = "", y = "Count", title = "Geographic Distribution") +
   theme_minimal(base_size = 14) +
   theme(legend.position = "none") +
   scale_fill_viridis_d(option = "turbo")
@@ -230,3 +230,4 @@ p_inc <- ggplot(inc_dist, aes(x = income, y = n, fill = income)) +
 
 ggplotly(p_inc, tooltip = c("x", "y")) %>% layout(margin = list(b = 120))
 ```
+
