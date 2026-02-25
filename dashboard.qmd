@@ -1,0 +1,231 @@
+---
+title: "Project Dashboard"
+format: 
+  dashboard:
+    scrolling: true
+    embed-resources: true 
+    include-in-header:
+      text: |
+        <style>
+        .quarto-dashboard-sidebar {
+          background-color: white !important;
+          border-right: 1px solid #dee2e6;
+        }
+        </style>
+theme: simplex
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+library(plotly)
+library(viridis)
+
+
+analysis_clean <- read_csv("analysis_clean.csv",show_col_types = FALSE)
+
+
+analysis_clean <- analysis_clean %>%
+  rowwise() %>%
+  mutate(privacy_risk = mean(c_across(qid13:qid18), na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(
+    ethical_trust_diff = qid28 - qid26,
+    trust_group = case_when(
+      ethical_trust_diff > 0 ~ "Pro-China ethics",
+      ethical_trust_diff < 0 ~ "Pro-US ethics",
+      TRUE ~ "Equal trust"
+    ),
+    # Pre-process Demographics
+    gender = factor(
+      qid31,
+      levels = c(1, 2, 3, 4),
+      labels = c("Male", "Female", "Non-binary", "Prefer not to say")
+    ),
+    age = factor(
+      qid32,
+      levels = c(1, 2, 3, 4, 5, 6),
+      labels = c("Under 18", "18–24", "25–34", "35–44", "45–54", "55 or above")
+    ),
+    education = factor(
+      qid33,
+      levels = c(1, 2, 3, 4),
+      labels = c("High school or below", "Associate degree", "Bachelor's degree", "Graduate degree or above")
+    ),
+    income = factor(
+      qid35,
+      levels = c(1, 2, 3, 4, 5),
+      labels = c("≤ $20,000", "$20,001–$49,999", "$50,000–$99,999", "$100,000 or above", "Prefer not to say")
+    )
+  )
+
+# Calculate summary metrics
+n_participants <- nrow(analysis_clean)
+age_mode <- names(sort(table(analysis_clean$age), decreasing = TRUE))[1]
+gender_mode <- names(sort(table(analysis_clean$gender), decreasing = TRUE))[1]
+geo_mode <- names(sort(table(analysis_clean$source), decreasing = TRUE))[1]
+
+```
+
+# Overview
+
+## Sidebar {.sidebar}
+
+**Project Overview**
+
+This study investigates the online community migration of "TikTok Refugees"---users moving from the US-based platform TikTok to the China-based platform RedNote.
+
+Through a structured survey of 130 participants, this research explores cross-platform migration motivations, application usage patterns, and user privacy perceptions.
+
+**Core Research Questions**
+
+-   Demographics & Behavior: What are the demographic characteristics and platform usage behaviors of "TikTok Refugees"?
+
+-   Platform Trust: Do these users exhibit a significant difference in trust between US-based platforms (TikTok) and China-based platforms (RedNote)?
+
+-   Risk Perception: Does a user's risk perception significantly influence their cross-border platform usage behavior?
+
+------------------------------------------------------------------------
+
+## Row {height="110px"}
+
+### Column {width="25%"}
+
+```{r}
+#| content: valuebox
+#| title: "Total Participants"
+list(icon = "people", color = "light", value = n_participants)
+```
+
+### Column {width="25%"}
+
+```{r}
+#| content: valuebox
+#| title: "Primary Age Bracket"
+list(icon = "person-badge", color = "light", value = age_mode)
+```
+
+### Column {width="25%"}
+
+```{r}
+#| content: valuebox
+#| title: "Primary Gender"
+list(icon = "gender-ambiguous", color = "light", value = gender_mode)
+```
+
+### Column {width="25%"}
+
+```{r}
+#| content: valuebox
+#| title: "Top Region"
+list(icon = "globe", color = "light", value = geo_mode)
+```
+
+## Row {height="350px"}
+
+### Column {width="1"}
+
+###  {.tabset}
+
+#### Age Distribution
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+age_dist <- analysis_clean |> 
+  drop_na(age) |>
+  count(age, name = "n")
+
+p_age <- ggplot(age_dist, aes(x = fct_rev(age), y = n, fill = age)) +
+  geom_col() +
+  labs(x = "Count", y = "", title = "Age Distribution") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d()
+
+ggplotly(p_age, tooltip = c("x", "y")) %>% layout(margin = list(l = 100))
+```
+
+#### Gender Distribution
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+gender_dist <- analysis_clean |> 
+  drop_na(gender) |>
+  count(gender, name = "n") |> 
+  mutate(gender = reorder(gender, n))
+
+p_gender <- ggplot(gender_dist, aes(x = gender, y= n, fill = gender)) +
+  geom_col() +
+  labs(x = "Count", y = "", title = "Gender Distribution") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d(option = "magma")
+
+ggplotly(p_gender, tooltip = c("x", "y")) %>% layout(margin = list(l = 100))
+```
+
+#### Geographic Distribution
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+geo_dist <- analysis_clean |> 
+  drop_na(source) |>
+  count(source, name = "n") |> 
+  mutate(source = reorder(source, n))
+
+p_geo <- ggplot(geo_dist, aes(x = source, y= n, fill = source)) +
+  geom_col() +
+  labs(x = "Count", y = "", title = "Geographic Distribution") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none") +
+  scale_fill_viridis_d(option = "turbo")
+
+ggplotly(p_geo, tooltip = c("x", "y")) %>% layout(margin = list(l = 100))
+```
+
+#### Education Level
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+edu_dist <- analysis_clean |> 
+  drop_na(education) |>
+  count(education, name = "n")
+
+p_edu <- ggplot(edu_dist, aes(x = education, y = n, fill = education)) +
+  geom_col() +
+  labs(x = "", y = "Count", title = "Education Level") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_viridis_d(option = "plasma")
+
+ggplotly(p_edu, tooltip = c("x", "y")) %>% layout(margin = list(b = 120))
+```
+
+#### Income Level
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+inc_dist <- analysis_clean |> 
+  drop_na(income) |>
+  count(income, name = "n")
+
+p_inc <- ggplot(inc_dist, aes(x = income, y = n, fill = income)) +
+  geom_col() +
+  labs(x = "", y = "Count", title = "Income Level") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_viridis_d(option = "cividis")
+
+ggplotly(p_inc, tooltip = c("x", "y")) %>% layout(margin = list(b = 120))
+```

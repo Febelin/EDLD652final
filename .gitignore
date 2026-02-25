@@ -47,3 +47,9 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+analysis_clean.*
+*_private.*
+
+# data file formats
+*.csv
