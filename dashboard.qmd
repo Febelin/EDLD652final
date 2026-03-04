@@ -3,17 +3,19 @@ title: "Project Dashboard"
 output-file: index.html
 format: 
   dashboard:
+    orientation: rows
     scrolling: true
-    embed-resources: true 
+    embed-resources: true
     include-in-header:
       text: |
         <style>
         .quarto-dashboard-sidebar {
-          background-color: white !important;
+          background-color: #f8f9fa !important;
           border-right: 1px solid #dee2e6;
+          padding: 20px;
         }
         </style>
-theme: simplex
+    theme: cosmo
 ---
 
 ```{r}
@@ -23,9 +25,7 @@ library(tidyverse)
 library(plotly)
 library(viridis)
 
-
 analysis_clean <- read_csv("analysis_clean.csv",show_col_types = FALSE)
-
 
 analysis_clean <- analysis_clean %>%
   rowwise() %>%
@@ -60,18 +60,14 @@ analysis_clean <- analysis_clean %>%
       labels = c("≤ $20,000", "$20,001–$49,999", "$50,000–$99,999", "$100,000 or above", "Prefer not to say")
     )
   )
-
 # Calculate summary metrics
 n_participants <- nrow(analysis_clean)
 age_mode <- names(sort(table(analysis_clean$age), decreasing = TRUE))[1]
 gender_mode <- names(sort(table(analysis_clean$gender), decreasing = TRUE))[1]
 geo_mode <- names(sort(table(analysis_clean$source), decreasing = TRUE))[1]
-
 ```
 
-# Overview
-
-## Sidebar {.sidebar}
+# Sidebar {.sidebar}
 
 **Project Overview**
 
@@ -81,17 +77,17 @@ Through a structured survey of 130 participants, this research explores cross-pl
 
 **Core Research Questions**
 
--   Demographics & Behavior: What are the demographic characteristics and platform usage behaviors of "TikTok Refugees"?
+1.  Demographics & Behavior: What are the demographic characteristics and platform usage behaviors of "TikTok Refugees"?
 
--   Platform Trust: Do these users exhibit a significant difference in trust between US-based platforms (TikTok) and China-based platforms (RedNote)?
+2.  Platform Trust: Do these users exhibit a significant difference in trust between US-based platforms (TikTok) and China-based platforms (RedNote)?
 
--   Risk Perception: Does a user's risk perception significantly influence their cross-border platform usage behavior?
+3.  Risk Perception: Does a user's risk perception significantly influence their cross-border platform usage behavior?
 
-------------------------------------------------------------------------
+# Dashboard Overview
 
-## Row {height="110px"}
+## Row {height="150px"}
 
-### Column {width="25%"}
+###  {width="25%"}
 
 ```{r}
 #| content: valuebox
@@ -99,7 +95,7 @@ Through a structured survey of 130 participants, this research explores cross-pl
 list(icon = "people", color = "light", value = n_participants)
 ```
 
-### Column {width="25%"}
+###  {width="25%"}
 
 ```{r}
 #| content: valuebox
@@ -107,7 +103,7 @@ list(icon = "people", color = "light", value = n_participants)
 list(icon = "person-badge", color = "light", value = age_mode)
 ```
 
-### Column {width="25%"}
+###  {width="25%"}
 
 ```{r}
 #| content: valuebox
@@ -115,7 +111,7 @@ list(icon = "person-badge", color = "light", value = age_mode)
 list(icon = "gender-ambiguous", color = "light", value = gender_mode)
 ```
 
-### Column {width="25%"}
+###  {width="25%"}
 
 ```{r}
 #| content: valuebox
@@ -123,13 +119,9 @@ list(icon = "gender-ambiguous", color = "light", value = gender_mode)
 list(icon = "globe", color = "light", value = geo_mode)
 ```
 
-## Row {height="350px"}
+## Row {.tabset height="500px"}
 
-### Column {width="1"}
-
-###  {.tabset}
-
-#### Age Distribution
+### Age Distribution
 
 ```{r}
 #| echo: false
@@ -140,16 +132,21 @@ age_dist <- analysis_clean |>
   count(age, name = "n")
 
 p_age <- ggplot(age_dist, aes(x = fct_rev(age), y = n, fill = age)) +
-  geom_col() +
-  labs(x = "", y = "Count", title = "Age Distribution") +
+  geom_col(alpha = 0.85) +
+  labs(x = "", y = "Number of Users") +
   theme_minimal(base_size = 14) +
-  theme(legend.position = "none") +
-  scale_fill_viridis_d()
+  theme(
+    legend.position = "none",
+    panel.grid.major.x = element_blank()
+  ) +
+  scale_fill_viridis_d(option = "mako", direction = -1)
 
-ggplotly(p_age, tooltip = c("x", "y")) %>% layout(margin = list(l = 100))
+ggplotly(p_age, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 20, b = 20, l = 20, r = 20))
 ```
 
-#### Gender Distribution
+### Gender Distribution
 
 ```{r}
 #| echo: false
@@ -161,16 +158,21 @@ gender_dist <- analysis_clean |>
   mutate(gender = reorder(gender, n))
 
 p_gender <- ggplot(gender_dist, aes(x = gender, y= n, fill = gender)) +
-  geom_col() +
-  labs(x = "", y = "Count", title = "Gender Distribution") +
+  geom_col(alpha = 0.85) +
+  labs(x = "", y = "Number of Users") +
   theme_minimal(base_size = 14) +
-  theme(legend.position = "none") +
-  scale_fill_viridis_d(option = "magma")
+  theme(
+    legend.position = "none",
+    panel.grid.major.x = element_blank()
+  ) +
+  scale_fill_viridis_d(option = "magma", direction = -1)
 
-ggplotly(p_gender, tooltip = c("x", "y")) %>% layout(margin = list(l = 100))
+ggplotly(p_gender, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 20, b = 20, l = 20, r = 20))
 ```
 
-#### Geographic Distribution
+### Geographic Distribution
 
 ```{r}
 #| echo: false
@@ -182,16 +184,21 @@ geo_dist <- analysis_clean |>
   mutate(source = reorder(source, n))
 
 p_geo <- ggplot(geo_dist, aes(x = source, y= n, fill = source)) +
-  geom_col() +
-  labs(x = "", y = "Count", title = "Geographic Distribution") +
+  geom_col(alpha = 0.85) +
+  labs(x = "", y = "Number of Users") +
   theme_minimal(base_size = 14) +
-  theme(legend.position = "none") +
+  theme(
+    legend.position = "none",
+    panel.grid.major.x = element_blank()
+  ) +
   scale_fill_viridis_d(option = "turbo")
 
-ggplotly(p_geo, tooltip = c("x", "y")) %>% layout(margin = list(l = 100))
+ggplotly(p_geo, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 20, b = 20, l = 20, r = 20))
 ```
 
-#### Education Level
+### Education Level
 
 ```{r}
 #| echo: false
@@ -202,16 +209,22 @@ edu_dist <- analysis_clean |>
   count(education, name = "n")
 
 p_edu <- ggplot(edu_dist, aes(x = education, y = n, fill = education)) +
-  geom_col() +
-  labs(x = "", y = "Count", title = "Education Level") +
+  geom_col(alpha = 0.85) +
+  labs(x = "", y = "Number of Users") +
   theme_minimal(base_size = 14) +
-  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_viridis_d(option = "plasma")
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major.x = element_blank()
+  ) +
+  scale_fill_viridis_d(option = "plasma", direction = -1)
 
-ggplotly(p_edu, tooltip = c("x", "y")) %>% layout(margin = list(b = 120))
+ggplotly(p_edu, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 20, b = 80, l = 20, r = 20))
 ```
 
-#### Income Level
+### Income Level
 
 ```{r}
 #| echo: false
@@ -222,12 +235,71 @@ inc_dist <- analysis_clean |>
   count(income, name = "n")
 
 p_inc <- ggplot(inc_dist, aes(x = income, y = n, fill = income)) +
-  geom_col() +
-  labs(x = "", y = "Count", title = "Income Level") +
+  geom_col(alpha = 0.85) +
+  labs(x = "", y = "Number of Users") +
   theme_minimal(base_size = 14) +
-  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_viridis_d(option = "cividis")
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  scale_fill_viridis_d(option = "cividis", direction = -1)
 
-ggplotly(p_inc, tooltip = c("x", "y")) %>% layout(margin = list(b = 120))
+ggplotly(p_inc, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 20, b = 100, l = 20, r = 20))
 ```
 
+## Row {height="450px"}
+
+### Privacy vs Trust Analysis
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Privacy vs Trust Analysis"
+
+df_scatter <- analysis_clean %>% drop_na(ethical_trust_diff, privacy_risk)
+
+p_scatter <- ggplot(df_scatter, aes(x = ethical_trust_diff, y = privacy_risk)) +
+  geom_point(alpha = 0.6, size = 1.5, aes(color = trust_group, text = paste("Trust Diff:", ethical_trust_diff, "<br>Privacy Risk:", round(privacy_risk, 2)))) +
+  geom_smooth(method = "lm", se = TRUE, color = "darkgray", linewidth = 0.8) +
+  scale_color_manual(values = c("Pro-China ethics" = "#956A88", "Pro-US ethics" = "#2A5196", "Equal trust" = "grey70")) +
+  labs(
+    x = "Ethical Trust Difference (China − US)",
+    y = "Perceived Privacy Risk",
+    color = "Orientation"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none")
+
+ggplotly(p_scatter, tooltip = "text") %>%
+  layout(margin = list(t = 40, b = 40, l = 50))
+```
+
+### Trust Orientation Distribution
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Trust Orientation Distribution"
+
+df_hist <- analysis_clean %>% drop_na(ethical_trust_diff, trust_group)
+
+p_hist <- ggplot(df_hist, aes(x = ethical_trust_diff, fill = trust_group)) +
+  geom_histogram(bins = 20, color = "white", alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  scale_fill_manual(
+    values = c("Pro-China ethics" = "#956A88", "Pro-US ethics" = "#2A5196", "Equal trust" = "grey70")
+  ) +
+  labs(
+    x = "Ethical Trust Difference (China − US)",
+    y = "Respondents Count",
+    fill = "Orientation"
+  ) +
+  theme_minimal(base_size = 14)
+
+ggplotly(p_hist) %>%
+  layout(margin = list(t = 40, b = 40, l = 50))
+```
