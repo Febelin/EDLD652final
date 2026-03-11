@@ -1,0 +1,104 @@
+/*-- scss:defaults --*/
+$primary: #007030;
+/* UO Green */
+$secondary: #FEE11A;
+/* UO Yellow */
+$body-bg: #FCFAF5;
+/* Very soft warm white for body */
+$body-color: #2D2D2D;
+/* Dark grey for readability */
+
+/* Dashboard layout variables */
+$navbar-bg: #007030;
+$navbar-fg: #ffffff;
+$navbar-brand-color: #FEE11A;
+$sidebar-bg: #005624;
+$sidebar-fg: #f8f9fa;
+$nav-tabs-link-active-bg: #FEE11A;
+$nav-tabs-link-active-color: #000000;
+$nav-tabs-link-active-border-color: #FEE11A;
+
+/*-- scss:rules --*/
+
+/* Navbar overrides */
+.navbar {
+  border-bottom: 4px solid #FEE11A;
+}
+
+.navbar-title {
+  color: #FEE11A !important;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/* Sidebar styling overrides */
+.sidebar p,
+.sidebar li {
+  color: #2D2D2D;
+  line-height: 1.6;
+}
+
+.sidebar strong {
+  color: #007030;
+  font-weight: 800;
+  font-size: 1.1em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sidebar h1,
+.sidebar h2,
+.sidebar h3 {
+  color: #005624;
+  margin-top: 1.5rem;
+  font-weight: 700;
+}
+
+/* Valuebox overrides for UO Green & Yellow */
+.value-box-light {
+  background-color: #ffffff;
+  border-left: 5px solid #007030;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.value-box-title {
+  color: #005624;
+  font-weight: 700;
+}
+
+.value-box-value {
+  color: #2D2D2D;
+  font-weight: 800;
+}
+
+.value-box-icon {
+  color: #007030;
+  opacity: 0.8;
+}
+
+/* Tabs styling */
+.nav-tabs {
+  border-bottom: 2px solid #e9ecef;
+}
+
+.nav-tabs .nav-link {
+  color: #007030;
+  font-weight: 600;
+  border: none;
+  padding: 10px 20px;
+  margin-right: 5px;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: #e8f5e9;
+  color: #005624;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #FEE11A !important;
+  color: #005624 !important;
+  border: none !important;
+  border-bottom: 3px solid #005624 !important;
+}

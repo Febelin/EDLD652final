@@ -6,16 +6,7 @@ format:
     orientation: rows
     scrolling: true
     embed-resources: true
-    include-in-header:
-      text: |
-        <style>
-        .quarto-dashboard-sidebar {
-          background-color: #f8f9fa !important;
-          border-right: 1px solid #dee2e6;
-          padding: 20px;
-        }
-        </style>
-    theme: cosmo
+    theme: [cosmo, custom.scss]
 ---
 
 ```{r}
@@ -25,7 +16,7 @@ library(tidyverse)
 library(plotly)
 library(viridis)
 
-analysis_clean <- read_csv("analysis_clean.csv",show_col_types = FALSE)
+analysis_clean <- read_csv("analysis_clean.csv", col_types = cols(qid8 = col_character(), qid9 = col_character()), show_col_types = FALSE)
 
 analysis_clean <- analysis_clean %>%
   rowwise() %>%
@@ -47,7 +38,7 @@ analysis_clean <- analysis_clean %>%
     age = factor(
       qid32,
       levels = c(1, 2, 3, 4, 5, 6),
-      labels = c("Under 18", "18–24", "25–34", "35–44", "45–54", "55 or above")
+      labels = c("Under 18", "18-24", "25-34", "35-44", "45-54", "55 or above")
     ),
     education = factor(
       qid33,
@@ -57,14 +48,53 @@ analysis_clean <- analysis_clean %>%
     income = factor(
       qid35,
       levels = c(1, 2, 3, 4, 5),
-      labels = c("≤ $20,000", "$20,001–$49,999", "$50,000–$99,999", "$100,000 or above", "Prefer not to say")
+      labels = c("<= $20,000", "$20,001-$49,999", "$50,000-$99,999", "$100,000 or above", "Prefer not to say")
+    ),
+    # Pre-process Platform Usage
+    tiktok_before = factor(
+      qid3,
+      levels = c(1, 2, 3, 4),
+      labels = c("Rarely", "A few times per week", "Daily", "Multiple times a day")
+    ),
+    rednote_now = factor(
+      qid4,
+      levels = c(1, 2, 3, 4),
+      labels = c("Rarely", "A few times per week", "Daily", "Multiple times a day")
+    ),
+    tiktok_after = factor(
+      qid6,
+      levels = c(1, 2, 3, 4),
+      labels = c("Yes, regularly", "Yes, decreased", "Rarely now", "Stopped using it")
     )
   )
-# Calculate summary metrics
+
+
+activities_dict <- c(
+  "1" = "Browsing content",
+  "2" = "Posting content",
+  "3" = "Interacting with others",
+  "4" = "Shopping",
+  "5" = "Other Activity"
+)
+
+reasons_dict <- c(
+  "1" = "Similar US platforms unavailable",
+  "2" = "Better content alignment",
+  "3" = "Encouraged by friends/influencers",
+  "4" = "Bypass U.S. restrictions",
+  "5" = "Access unique products/services",
+  "6" = "Curiosity about Chinese platforms",
+  "7" = "Information outside US media",
+  "8" = "Connect to international communities",
+  "9" = "Other Reason"
+)
 n_participants <- nrow(analysis_clean)
 age_mode <- names(sort(table(analysis_clean$age), decreasing = TRUE))[1]
 gender_mode <- names(sort(table(analysis_clean$gender), decreasing = TRUE))[1]
 geo_mode <- names(sort(table(analysis_clean$source), decreasing = TRUE))[1]
+
+# High-end designer palette available globally
+prof_palette_1 <- c("#264653", "#2A9D8F", "#E9C46A", "#F4A261", "#E76F51", "#8AB17D", "#BABB74", "#D8A47F", "#F28482", "#F5CAC3", "#84A59D", "#F6BD60")
 ```
 
 # Sidebar {.sidebar}
@@ -75,6 +105,14 @@ This study investigates the online community migration of "TikTok Refugees"---us
 
 Through a structured survey of 130 participants, this research explores cross-platform migration motivations, application usage patterns, and user privacy perceptions.
 
+**Research Background**
+
+These news highlights the phenomenon of "TikTok refugees" migrating to RedNote:
+
+* [Over half a million ‘TikTok refugees’ flock to China's RedNote](https://www.reuters.com/technology/over-half-million-tiktok-refugees-flock-chinas-rednote-2025-01-14/)
+* [TikTok users flock to Chinese app RedNote as US ban looms](https://www.bbc.com/news/articles/c2475l7zpqyo)
+* [What to know about RedNote, the Chinese app that American TikTokkers are flooding](https://www.npr.org/2025/01/15/nx-s1-5260742/tiktok-china-rednote-xiaohongshu-app)
+
 **Core Research Questions**
 
 1.  Demographics & Behavior: What are the demographic characteristics and platform usage behaviors of "TikTok Refugees"?
@@ -83,7 +121,7 @@ Through a structured survey of 130 participants, this research explores cross-pl
 
 3.  Risk Perception: Does a user's risk perception significantly influence their cross-border platform usage behavior?
 
-# Dashboard Overview
+# Demographics
 
 ## Row {height="150px"}
 
@@ -91,167 +129,645 @@ Through a structured survey of 130 participants, this research explores cross-pl
 
 ```{r}
 #| content: valuebox
-#| title: "Total Participants"
-list(icon = "people", color = "light", value = n_participants)
+#| title: "Migrating Users Surveyed"
+list(icon = "people-fill", color = "white", value = n_participants)
 ```
 
 ###  {width="25%"}
 
 ```{r}
 #| content: valuebox
-#| title: "Primary Age Bracket"
-list(icon = "person-badge", color = "light", value = age_mode)
+#| title: "Dominant Age Cohort"
+list(icon = "person-lines-fill", color = "white", value = age_mode)
 ```
 
 ###  {width="25%"}
 
 ```{r}
 #| content: valuebox
-#| title: "Primary Gender"
-list(icon = "gender-ambiguous", color = "light", value = gender_mode)
+#| title: "Primary Gender Identity"
+list(icon = "person-badge-fill", color = "white", value = gender_mode)
 ```
 
 ###  {width="25%"}
 
 ```{r}
 #| content: valuebox
-#| title: "Top Region"
-list(icon = "globe", color = "light", value = geo_mode)
+#| title: "Geographic Concentration"
+list(icon = "globe-americas", color = "white", value = geo_mode)
 ```
 
 ## Row {.tabset height="500px"}
 
-### Age Distribution
+### Version 1 {layout-ncol="1"}
 
 ```{r}
 #| echo: false
 #| message: false
 #| warning: false
-age_dist <- analysis_clean |> 
-  drop_na(age) |>
-  count(age, name = "n")
+#| title: "Demographic Characteristics"
+# Combine age, gender, geographic, education, and income
+df_demo <- analysis_clean |> 
+  select(Age = age, Gender = gender, Region = source, Education = education, Income = income) |> 
+  pivot_longer(everything(), names_to = "Demographic", values_to = "Category") |> 
+  drop_na(Category) |> 
+  count(Demographic, Category)
 
-p_age <- ggplot(age_dist, aes(x = fct_rev(age), y = n, fill = age)) +
-  geom_col(alpha = 0.85) +
+# We want fixed ordering for categories across panels where possible
+# but since they all have different categories, we'll let ggplot handle the ordering via free axes.
+# However, to maintain the structural order (like income or age brackets), we can set Category as a factor
+# combining all the levels from our preprocessing.
+
+all_levels <- c(
+  levels(analysis_clean$age),
+  levels(analysis_clean$gender),
+  levels(analysis_clean$education),
+  levels(analysis_clean$income),
+  unique(analysis_clean$source) %>% na.omit() %>% as.character()
+) %>% unique()
+
+df_demo$Category <- factor(df_demo$Category, levels = all_levels)
+
+p_demo <- ggplot(df_demo, aes(x = Category, y = n, fill = Category)) +
+  geom_col(alpha = 0.9, width = 0.75, show.legend = FALSE) +
+  facet_wrap(~ Demographic, scales = "free", ncol = 3) +
   labs(x = "", y = "Number of Users") +
-  theme_minimal(base_size = 14) +
+  theme_minimal(base_size = 14, base_family = "sans") +
   theme(
-    legend.position = "none",
-    panel.grid.major.x = element_blank()
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10, color = "#4a4a4a"),
+    axis.text.y = element_text(size = 10, color = "#4a4a4a"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(face = "bold", size = 13, color = "#1d3557", margin = margin(b = 10)),
+    plot.background = element_rect(fill = "transparent", color = NA)
   ) +
-  scale_fill_viridis_d(option = "mako", direction = -1)
+  scale_fill_manual(values = colorRampPalette(prof_palette_1)(length(all_levels)))
 
-ggplotly(p_age, tooltip = c("x", "y")) %>% 
+ggplotly(p_demo, tooltip = c("x", "y")) %>% 
   config(displayModeBar = FALSE) %>%
-  layout(margin = list(t = 20, b = 20, l = 20, r = 20))
+  layout(margin = list(t = 30, b = 60, l = 20, r = 20), hovermode = "closest")
 ```
 
-### Gender Distribution
+### Version 2 {layout-ncol="1"}
 
 ```{r}
 #| echo: false
 #| message: false
 #| warning: false
-gender_dist <- analysis_clean |> 
-  drop_na(gender) |>
-  count(gender, name = "n") |> 
-  mutate(gender = reorder(gender, n))
+#| title: "Age and Gender Pyramid"
 
-p_gender <- ggplot(gender_dist, aes(x = gender, y= n, fill = gender)) +
-  geom_col(alpha = 0.85) +
-  labs(x = "", y = "Number of Users") +
-  theme_minimal(base_size = 14) +
+df_pyramid <- analysis_clean |> 
+  select(Age = age, Gender = gender) |> 
+  drop_na(Age, Gender) |> 
+  mutate(Age = fct_drop(Age)) |>
+  count(Age, Gender) |> 
+  mutate(
+    n_pyramid = if_else(Gender == "Male", -n, as.numeric(n)),
+    hover_text = paste("Gender: ", Gender, "<br>Count: ", n, sep = "")
+  )
+
+# Gender specific sleek palette
+gender_palette <- c("Male" = "#3d5a80", "Female" = "#ee6c4d", "Non-binary" = "#98c1d9", "Prefer not to say" = "#e0fbfc")
+
+p_pyramid <- ggplot(df_pyramid, aes(x = Age, y = n_pyramid, fill = Gender, text = hover_text)) +
+  geom_col(alpha = 0.9, width = 0.8) +
+  coord_flip() +
+  scale_y_continuous(labels = abs) +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  labs(x = "Age Group", y = "Number of Users") +
   theme(
-    legend.position = "none",
-    panel.grid.major.x = element_blank()
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text = element_text(color = "#4a4a4a")
   ) +
-  scale_fill_viridis_d(option = "magma", direction = -1)
+  scale_fill_manual(values = gender_palette)
 
-ggplotly(p_gender, tooltip = c("x", "y")) %>% 
-  config(displayModeBar = FALSE) %>%
-  layout(margin = list(t = 20, b = 20, l = 20, r = 20))
+ggplotly(p_pyramid, tooltip = "text") %>%
+  layout(margin = list(b = 60), barmode = 'relative') %>%
+  config(displayModeBar = FALSE)
 ```
-
-### Geographic Distribution
 
 ```{r}
 #| echo: false
 #| message: false
 #| warning: false
-geo_dist <- analysis_clean |> 
-  drop_na(source) |>
-  count(source, name = "n") |> 
-  mutate(source = reorder(source, n))
+#| title: "Other Demographics"
 
-p_geo <- ggplot(geo_dist, aes(x = source, y= n, fill = source)) +
-  geom_col(alpha = 0.85) +
+df_demo_other <- analysis_clean |> 
+  select(Region = source, Education = education, Income = income) |> 
+  pivot_longer(everything(), names_to = "Demographic", values_to = "Category") |> 
+  drop_na(Category) |> 
+  count(Demographic, Category)
+
+all_levels_other <- c(
+  levels(analysis_clean$education),
+  levels(analysis_clean$income),
+  unique(analysis_clean$source) %>% na.omit() %>% as.character()
+) %>% unique()
+
+df_demo_other$Category <- factor(df_demo_other$Category, levels = all_levels_other)
+
+other_palette <- c("#1d3557", "#457b9d", "#a8dadc", "#e63946", "#f1faee", "#2b9348", "#80b918", "#d2daca")
+
+p_demo_other <- ggplot(df_demo_other, aes(x = Category, y = n, fill = Category)) +
+  geom_col(alpha = 0.9, width = 0.75, show.legend = FALSE) +
+  facet_wrap(~ Demographic, scales = "free", ncol = 3) +
   labs(x = "", y = "Number of Users") +
-  theme_minimal(base_size = 14) +
+  theme_minimal(base_size = 14, base_family = "sans") +
   theme(
-    legend.position = "none",
-    panel.grid.major.x = element_blank()
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10, color = "#4a4a4a"),
+    axis.text.y = element_text(size = 10, color = "#4a4a4a"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(face = "bold", size = 13, color = "#1d3557", margin = margin(b = 10))
   ) +
-  scale_fill_viridis_d(option = "turbo")
+  scale_fill_manual(values = colorRampPalette(other_palette)(length(all_levels_other)))
 
-ggplotly(p_geo, tooltip = c("x", "y")) %>% 
+ggplotly(p_demo_other, tooltip = c("x", "y")) %>% 
   config(displayModeBar = FALSE) %>%
-  layout(margin = list(t = 20, b = 20, l = 20, r = 20))
+  layout(margin = list(t = 30, b = 60, l = 20, r = 20), hovermode = "closest")
 ```
 
-### Education Level
+### Best Version {layout-ncol="1"}
 
 ```{r}
 #| echo: false
 #| message: false
 #| warning: false
-edu_dist <- analysis_clean |> 
-  drop_na(education) |>
-  count(education, name = "n")
+#| title: "Age and Gender Pyramid"
 
-p_edu <- ggplot(edu_dist, aes(x = education, y = n, fill = education)) +
-  geom_col(alpha = 0.85) +
-  labs(x = "", y = "Number of Users") +
-  theme_minimal(base_size = 14) +
+df_pyramid <- analysis_clean |> 
+  select(Age = age, Gender = gender) |> 
+  drop_na(Age, Gender) |> 
+  mutate(Age = fct_drop(Age)) |>
+  count(Age, Gender) |> 
+  mutate(
+    n_pyramid = if_else(Gender == "Male", -n, as.numeric(n)),
+    hover_text = paste("Gender: ", Gender, "<br>Count: ", n, sep = "")
+  )
+
+# Gender specific sleek palette
+gender_palette <- c("Male" = "#3d5a80", "Female" = "#ee6c4d", "Non-binary" = "#98c1d9", "Prefer not to say" = "#e0fbfc")
+
+p_pyramid <- ggplot(df_pyramid, aes(x = Age, y = n_pyramid, fill = Gender, text = hover_text)) +
+  geom_col(alpha = 0.9, width = 0.8) +
+  coord_flip() +
+  scale_y_continuous(labels = abs) +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  labs(x = "Age Group", y = "Number of Users") +
   theme(
-    legend.position = "none",
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    panel.grid.major.x = element_blank()
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text = element_text(color = "#4a4a4a")
   ) +
-  scale_fill_viridis_d(option = "plasma", direction = -1)
+  scale_fill_manual(values = gender_palette)
 
-ggplotly(p_edu, tooltip = c("x", "y")) %>% 
-  config(displayModeBar = FALSE) %>%
-  layout(margin = list(t = 20, b = 80, l = 20, r = 20))
+ggplotly(p_pyramid, tooltip = "text") %>%
+  layout(margin = list(b = 60), barmode = 'relative') %>%
+  config(displayModeBar = FALSE)
 ```
-
-### Income Level
 
 ```{r}
 #| echo: false
 #| message: false
 #| warning: false
-inc_dist <- analysis_clean |> 
-  drop_na(income) |>
-  count(income, name = "n")
+#| title: "Region to Education to Income Flow"
 
-p_inc <- ggplot(inc_dist, aes(x = income, y = n, fill = income)) +
-  geom_col(alpha = 0.85) +
-  labs(x = "", y = "Number of Users") +
-  theme_minimal(base_size = 14) +
-  theme(
-    legend.position = "none",
-    axis.text.x = element_text(angle = 45, hjust = 1)
-  ) +
-  scale_fill_viridis_d(option = "cividis", direction = -1)
+# Define node sources
+sankey_nodes <- unique(c(
+  as.character(analysis_clean$source),
+  as.character(analysis_clean$education),
+  as.character(analysis_clean$income)
+)) %>% na.omit()
 
-ggplotly(p_inc, tooltip = c("x", "y")) %>% 
-  config(displayModeBar = FALSE) %>%
-  layout(margin = list(t = 20, b = 100, l = 20, r = 20))
+# Define Links Region -> Education
+links_region_edu <- analysis_clean %>%
+  select(source = source, target = education) %>%
+  drop_na() %>%
+  count(source, target) %>%
+  rename(value = n)
+
+# Define Links Education -> Income
+links_edu_inc <- analysis_clean %>%
+  select(source = education, target = income) %>%
+  drop_na() %>%
+  count(source, target) %>%
+  rename(value = n)
+
+# Combine
+sankey_links <- bind_rows(
+  mutate(links_region_edu, source = as.character(source), target = as.character(target)),
+  mutate(links_edu_inc, source = as.character(source), target = as.character(target))
+) %>%
+  mutate(
+    source_id = match(source, sankey_nodes) - 1,
+    target_id = match(target, sankey_nodes) - 1
+  )
+
+# Add matching colors
+sankey_colors <- colorRampPalette(prof_palette_1)(length(sankey_nodes))
+
+p_sankey <- plot_ly(
+    type = "sankey",
+    orientation = "h",
+    node = list(
+      label = sankey_nodes,
+      pad = 15,
+      thickness = 25,
+      line = list(color = "#ffffff", width = 1),
+      color = sankey_colors
+    ),
+    link = list(
+      source = sankey_links$source_id,
+      target = sankey_links$target_id,
+      value = sankey_links$value,
+      color = "rgba(100, 100, 100, 0.2)"
+    )
+  ) %>% 
+  layout(
+    margin = list(t = 30, b = 30, l = 30, r = 30),
+    font = list(family = "sans", size = 12, color = "#4a4a4a")
+  ) %>%
+  config(displayModeBar = FALSE)
+
+p_sankey
 ```
 
-## Row {height="450px"}
+# Platform Behaviors
 
-### Privacy vs Trust Analysis
+## Row {.tabset height="1000px"}
+
+### Version 1 {layout-ncol="1"}
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "RedNote Usage Frequency"
+df_rn <- analysis_clean |> 
+  select(Response = rednote_now) |> 
+  drop_na() |> 
+  count(Response) |> 
+  mutate(
+    # Order responses on the x-axis
+    Response = factor(Response, levels = c(
+      "Multiple times a day", "Daily", "A few times per week", "Rarely"
+    ))
+  )
+
+freq_palette <- c("Multiple times a day" = "#112A46", "Daily" = "#1A5276", "A few times per week" = "#5DADE2", "Rarely" = "#AED6F1")
+
+p_comp <- ggplot(df_rn, aes(x = Response, y = n, fill = Response)) +
+  geom_col(alpha = 0.95, width = 0.6) +
+  labs(x = "", y = "Number of Users") +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 11, color = "#2D2D2D"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_fill_manual(values = freq_palette)
+
+ggplotly(p_comp, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 40, b = 80, l = 20, r = 20))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Primary Activities on RedNote"
+# Process QID8
+activities_df <- analysis_clean |> 
+  select(qid8) |> 
+  drop_na() |> 
+  separate_longer_delim(qid8, delim = ",") |> 
+  mutate(Activity = activities_dict[str_trim(qid8)]) |> 
+  count(Activity, name = "n") |> 
+  mutate(Activity = reorder(Activity, n))
+
+act_palette <- c("#8e44ad", "#9b59b6", "#af7ac5", "#c39bd3", "#d7bde2")
+
+p_act <- ggplot(activities_df, aes(x = Activity, y = n, fill = Activity)) +
+  geom_col(alpha = 0.9, width = 0.7) +
+  coord_flip() +
+  labs(x = "", y = "Number of Selections", title = "What are users doing on RedNote?") +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 15, color = "#2c3e50"),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_fill_manual(values = colorRampPalette(act_palette)(length(unique(activities_df$Activity))))
+
+ggplotly(p_act, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 40, b = 20, l = 200, r = 20))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Reasons for Using RedNote"
+# Process QID9
+reasons_df <- analysis_clean |> 
+  select(qid9) |> 
+  drop_na() |> 
+  separate_longer_delim(qid9, delim = ",") |> 
+  mutate(Reason = reasons_dict[str_trim(qid9)]) |> 
+  count(Reason, name = "n") |> 
+  mutate(Reason = reorder(Reason, n))
+
+reason_palette <- c("#b31237", "#e73e4b", "#f77f00", "#fcbf49", "#eae2b7")
+
+p_reas <- ggplot(reasons_df, aes(x = Reason, y = n, fill = Reason)) +
+  geom_col(alpha = 0.9, width = 0.75) +
+  coord_flip() +
+  labs(x = "", y = "Number of Selections", title = "Why are users moving to RedNote?") +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 15, color = "#2c3e50"),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_fill_manual(values = colorRampPalette(reason_palette)(length(unique(reasons_df$Reason))))
+
+ggplotly(p_reas, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 40, b = 20, l = 250, r = 20))
+```
+
+### Version 2 {layout-ncol="1"}
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "User Journey: Motivation to Activity to Frequency"
+
+# Define mappings
+activities_dict <- c("1" = "Browsing content", "2" = "Posting content", "3" = "Interacting with others", "4" = "Shopping", "5" = "Other Activity")
+reasons_dict <- c("1" = "Similar US platforms unavailable", "2" = "Better content alignment", "3" = "Encouraged by friends/influencers", "4" = "Bypass U.S. restrictions", "5" = "Access unique products/services", "6" = "Curiosity about Chinese platforms", "7" = "Information outside US media", "8" = "Connect to international communities", "9" = "Other Reason")
+
+# Expand data for Sankey
+flow_df <- analysis_clean %>%
+  select(id = qid1, qid9, qid8, Frequency = qid6) %>%
+  drop_na() %>%
+  separate_longer_delim(qid9, delim = ",") %>%
+  mutate(Reason = reasons_dict[str_trim(qid9)]) %>%
+  separate_longer_delim(qid8, delim = ",") %>%
+  mutate(Activity = activities_dict[str_trim(qid8)]) %>%
+  mutate(Frequency = factor(Frequency, levels = c(1, 2, 3, 4), labels = c("Rarely", "A few times per week", "Daily", "Multiple times a day")))
+
+# Nodes
+s_nodes <- unique(c(as.character(flow_df$Reason), as.character(flow_df$Activity), as.character(flow_df$Frequency))) %>% na.omit()
+
+# Links
+s_links <- bind_rows(
+  flow_df %>% count(source = Reason, target = Activity) %>% rename(value = n),
+  flow_df %>% count(source = Activity, target = as.character(Frequency)) %>% rename(value = n)
+) %>%
+  mutate(source_id = match(source, s_nodes) - 1, target_id = match(target, s_nodes) - 1)
+
+# High-end palette for Sankey nodes
+s_colors <- colorRampPalette(prof_palette_1)(length(s_nodes))
+
+p_behavior_sankey <- plot_ly(
+    type = "sankey",
+    orientation = "h",
+    node = list(
+      label = s_nodes,
+      pad = 15,
+      thickness = 25,
+      line = list(color = "#ffffff", width = 1),
+      color = s_colors
+    ),
+    link = list(
+      source = s_links$source_id,
+      target = s_links$target_id,
+      value = s_links$value,
+      color = "rgba(100, 100, 100, 0.2)"
+    )
+  ) %>% 
+  layout(
+    margin = list(t = 30, b = 30, l = 30, r = 30),
+    font = list(family = "sans", size = 11, color = "#4a4a4a")
+  ) %>%
+  config(displayModeBar = FALSE)
+
+p_behavior_sankey
+```
+
+### Best Version
+
+#### Row {height="55%"}
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "User Journey: Motivation to Activity to Frequency"
+
+# Define mappings
+activities_dict <- c("1" = "Browsing content", "2" = "Posting content", "3" = "Interacting with others", "4" = "Shopping", "5" = "Other Activity")
+reasons_dict <- c("1" = "Similar US platforms unavailable", "2" = "Better content alignment", "3" = "Encouraged by friends/influencers", "4" = "Bypass U.S. restrictions", "5" = "Access unique products/services", "6" = "Curiosity about Chinese platforms", "7" = "Information outside US media", "8" = "Connect to international communities", "9" = "Other Reason")
+
+# Expand data for Sankey
+flow_df <- analysis_clean %>%
+  select(id = qid1, qid9, qid8, Frequency = qid6) %>%
+  drop_na() %>%
+  separate_longer_delim(qid9, delim = ",") %>%
+  mutate(Reason = reasons_dict[str_trim(qid9)]) %>%
+  separate_longer_delim(qid8, delim = ",") %>%
+  mutate(Activity = activities_dict[str_trim(qid8)]) %>%
+  mutate(Frequency = factor(Frequency, levels = c(1, 2, 3, 4), labels = c("Rarely", "A few times per week", "Daily", "Multiple times a day")))
+
+# Nodes
+s_nodes <- unique(c(as.character(flow_df$Reason), as.character(flow_df$Activity), as.character(flow_df$Frequency))) %>% na.omit()
+
+# Links
+s_links <- bind_rows(
+  flow_df %>% count(source = Reason, target = Activity) %>% rename(value = n),
+  flow_df %>% count(source = Activity, target = as.character(Frequency)) %>% rename(value = n)
+) %>%
+  mutate(source_id = match(source, s_nodes) - 1, target_id = match(target, s_nodes) - 1)
+
+# High-end palette for Sankey nodes
+s_colors <- colorRampPalette(prof_palette_1)(length(s_nodes))
+
+p_behavior_sankey_best <- plot_ly(
+    type = "sankey",
+    orientation = "h",
+    node = list(
+      label = s_nodes,
+      pad = 15,
+      thickness = 25,
+      line = list(color = "#ffffff", width = 1),
+      color = s_colors
+    ),
+    link = list(
+      source = s_links$source_id,
+      target = s_links$target_id,
+      value = s_links$value,
+      color = "rgba(120, 120, 120, 0.1)"  # Lighter and more transparent
+    )
+  ) %>% 
+  layout(
+    margin = list(t = 60, b = 30, l = 30, r = 30),
+    font = list(family = "sans", size = 11, color = "#4a4a4a"),
+    plot_bgcolor = "#ffffff",
+    paper_bgcolor = "#ffffff",
+    annotations = list(
+      list(x = 0, y = 1.05, text = "Motivation", showarrow = FALSE, font = list(size = 14, color = "#1d3557", family="sans"), xref = "paper", yref = "paper"),
+      list(x = 0.5, y = 1.05, text = "Activity", showarrow = FALSE, font = list(size = 14, color = "#1d3557", family="sans"), xref = "paper", yref = "paper"),
+      list(x = 1, y = 1.05, text = "Usage Frequency", showarrow = FALSE, font = list(size = 14, color = "#1d3557", family="sans"), xref = "paper", yref = "paper")
+    )
+  ) %>%
+  config(displayModeBar = FALSE)
+
+p_behavior_sankey_best
+```
+
+#### Row {.tabset height="45%"}
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Reasons for Using RedNote"
+# Process QID9
+reasons_df <- analysis_clean |> 
+  select(qid9) |> 
+  drop_na() |> 
+  separate_longer_delim(qid9, delim = ",") |> 
+  mutate(Reason = reasons_dict[str_trim(qid9)]) |> 
+  count(Reason, name = "n") |> 
+  mutate(Reason = reorder(Reason, n))
+
+# Sankey-matched colors for Reasons nodes
+reason_sankey_palette <- c(
+  "Similar US platforms unavailable" = "#E87552",
+  "Better content alignment" = "#264653",
+  "Encouraged by friends/influencers" = "#B59269",
+  "Bypass U.S. restrictions" = "#317874",
+  "Access unique products/services" = "#93B27B",
+  "Curiosity about Chinese platforms" = "#62A884",
+  "Information outside US media" = "#DDC16C",
+  "Connect to international communities" = "#F0B064",
+  "Other Reason" = "#F0955D"
+)
+
+p_reas_best <- ggplot(reasons_df, aes(x = Reason, y = n, fill = Reason)) +
+  geom_col(alpha = 0.9, width = 0.75) +
+  coord_flip() +
+  labs(x = "", y = "Number of Selections", title = "Why are users moving to RedNote?") +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 15, color = "#2c3e50"),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_fill_manual(values = reason_sankey_palette)
+
+ggplotly(p_reas_best, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 40, b = 20, l = 250, r = 20))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Primary Activities on RedNote"
+# Process QID8
+activities_df <- analysis_clean |> 
+  select(qid8) |> 
+  drop_na() |> 
+  separate_longer_delim(qid8, delim = ",") |> 
+  mutate(Activity = activities_dict[str_trim(qid8)]) |> 
+  count(Activity, name = "n") |> 
+  mutate(Activity = reorder(Activity, n))
+
+# Sankey-matched colors for Activities nodes
+act_sankey_palette <- c(
+  "Browsing content" = "#9DA86C",
+  "Posting content" = "#E48179",
+  "Interacting with others" = "#BEA764",
+  "Shopping" = "#D88A79",
+  "Other Activity" = "#C98662"
+)
+
+p_act_best <- ggplot(activities_df, aes(x = Activity, y = n, fill = Activity)) +
+  geom_col(alpha = 0.9, width = 0.7) +
+  coord_flip() +
+  labs(x = "", y = "Number of Selections", title = "What are users doing on RedNote?") +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 15, color = "#2c3e50"),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_fill_manual(values = act_sankey_palette)
+
+ggplotly(p_act_best, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 40, b = 20, l = 200, r = 20))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "RedNote Usage Frequency"
+df_rn <- analysis_clean |> 
+  select(Response = rednote_now) |> 
+  drop_na() |> 
+  count(Response) |> 
+  mutate(
+    Response = factor(Response, levels = c(
+      "Multiple times a day", "Daily", "A few times per week", "Rarely"
+    ))
+  )
+
+# Sankey-matched colors for Frequency nodes
+freq_sankey_palette <- c(
+  "Rarely" = "#A5A973",
+  "A few times per week" = "#F3B654",
+  "Daily" = "#E7BFB7",
+  "Multiple times a day" = "#9FA7A3"
+)
+
+p_comp_best <- ggplot(df_rn, aes(x = Response, y = n, fill = Response)) +
+  geom_col(alpha = 0.95, width = 0.6) +
+  labs(x = "", y = "Number of Users") +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 11, color = "#2D2D2D"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_fill_manual(values = freq_sankey_palette)
+
+ggplotly(p_comp_best, tooltip = c("x", "y")) %>% 
+  config(displayModeBar = FALSE) %>%
+  layout(margin = list(t = 40, b = 80, l = 20, r = 20))
+```
+
+# Trust Analysis
+
+## Row {.tabset height="600px"}
+
+### Version 1 {layout-ncol="1"}
 
 ```{r}
 #| echo: false
@@ -260,24 +776,26 @@ ggplotly(p_inc, tooltip = c("x", "y")) %>%
 #| title: "Privacy vs Trust Analysis"
 
 df_scatter <- analysis_clean %>% drop_na(ethical_trust_diff, privacy_risk)
+trust_palette_v1 <- c("Pro-China ethics" = "#956A88", "Pro-US ethics" = "#2A5196", "Equal trust" = "grey70")
 
 p_scatter <- ggplot(df_scatter, aes(x = ethical_trust_diff, y = privacy_risk)) +
-  geom_point(alpha = 0.6, size = 1.5, aes(color = trust_group, text = paste("Trust Diff:", ethical_trust_diff, "<br>Privacy Risk:", round(privacy_risk, 2)))) +
-  geom_smooth(method = "lm", se = TRUE, color = "darkgray", linewidth = 0.8) +
-  scale_color_manual(values = c("Pro-China ethics" = "#956A88", "Pro-US ethics" = "#2A5196", "Equal trust" = "grey70")) +
+  geom_point(alpha = 0.8, size = 2.5, aes(color = trust_group, text = paste("Trust Diff:", ethical_trust_diff, "<br>Privacy Risk:", round(privacy_risk, 2)))) +
+  geom_smooth(method = "lm", se = TRUE, color = "#333333", linewidth = 0.8, fill = "#e5e5e5") +
+  scale_color_manual(values = trust_palette_v1) +
   labs(
     x = "Ethical Trust Difference (China − US)",
     y = "Perceived Privacy Risk",
     color = "Orientation"
   ) +
-  theme_minimal(base_size = 14) +
-  theme(legend.position = "none")
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "none",
+    panel.grid.minor = element_blank()
+  )
 
 ggplotly(p_scatter, tooltip = "text") %>%
   layout(margin = list(t = 40, b = 40, l = 50))
 ```
-
-### Trust Orientation Distribution
 
 ```{r}
 #| echo: false
@@ -288,18 +806,143 @@ ggplotly(p_scatter, tooltip = "text") %>%
 df_hist <- analysis_clean %>% drop_na(ethical_trust_diff, trust_group)
 
 p_hist <- ggplot(df_hist, aes(x = ethical_trust_diff, fill = trust_group)) +
-  geom_histogram(bins = 20, color = "white", alpha = 0.8) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
-  scale_fill_manual(
-    values = c("Pro-China ethics" = "#956A88", "Pro-US ethics" = "#2A5196", "Equal trust" = "grey70")
-  ) +
+  geom_histogram(bins = 20, color = "white", alpha = 0.9, linewidth = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "#333333", linewidth = 1) +
+  scale_fill_manual(values = trust_palette_v1) +
   labs(
     x = "Ethical Trust Difference (China − US)",
     y = "Respondents Count",
     fill = "Orientation"
   ) +
-  theme_minimal(base_size = 14)
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "right",
+    panel.grid.minor = element_blank()
+  )
 
 ggplotly(p_hist) %>%
+  layout(margin = list(t = 40, b = 40, l = 50))
+```
+
+### Version 2 {layout-ncol="1"}
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Privacy vs Trust Analysis"
+
+df_scatter <- analysis_clean %>% drop_na(ethical_trust_diff, privacy_risk)
+trust_palette <- c("Pro-China ethics" = "#d62828", "Pro-US ethics" = "#003049", "Equal trust" = "#f77f00")
+
+p_scatter_v2 <- ggplot(df_scatter, aes(x = ethical_trust_diff, y = privacy_risk)) +
+  geom_point(alpha = 0.8, size = 2.5, aes(color = trust_group, text = paste("Trust Diff:", ethical_trust_diff, "<br>Privacy Risk:", round(privacy_risk, 2)))) +
+  geom_smooth(method = "lm", se = TRUE, color = "#333333", linewidth = 0.8, fill = "#e5e5e5") +
+  scale_color_manual(values = trust_palette) +
+  labs(
+    x = "Ethical Trust Difference (China − US)",
+    y = "Perceived Privacy Risk",
+    color = "Orientation"
+  ) +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "none",
+    panel.grid.minor = element_blank()
+  )
+
+ggplotly(p_scatter_v2, tooltip = "text") %>%
+  layout(margin = list(t = 40, b = 40, l = 50))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Trust Orientation Distribution"
+
+df_hist <- analysis_clean %>% drop_na(ethical_trust_diff, trust_group)
+
+p_hist_v2 <- ggplot(df_hist, aes(x = ethical_trust_diff, fill = trust_group)) +
+  geom_histogram(bins = 20, color = "white", alpha = 0.9, linewidth = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "#333333", linewidth = 1) +
+  scale_fill_manual(values = trust_palette) +
+  labs(
+    x = "Ethical Trust Difference (China − US)",
+    y = "Respondents Count",
+    fill = "Orientation"
+  ) +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "right",
+    panel.grid.minor = element_blank()
+  )
+
+ggplotly(p_hist_v2) %>%
+  layout(margin = list(t = 40, b = 40, l = 50))
+```
+
+### Best Version {layout-ncol="1"}
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Participants’ Ethical Trust Skews Toward China"
+
+df_hist <- analysis_clean %>% drop_na(ethical_trust_diff, trust_group)
+
+# Define the custom color palette requested by the user
+best_trust_palette <- c("Pro-China ethics" = "#d62828", "Pro-US ethics" = "#003049", "Equal trust" = "grey70")
+
+p_hist_best <- ggplot(df_hist, aes(x = ethical_trust_diff, fill = trust_group)) +
+  geom_histogram(bins = 20, color = "white", alpha = 0.9, linewidth = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "#333333", linewidth = 1) +
+  scale_fill_manual(values = best_trust_palette) +
+  labs(
+    x = "Ethical Trust Difference (China − US)",
+    y = "Respondents Count",
+    fill = "Orientation",
+    subtitle = "Higher values indicate stronger trust in Chinese platform ethics over US ones"
+  ) +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "right",
+    panel.grid.minor = element_blank()
+  ) +
+  annotate("text", x = 2, y = max(table(cut(df_hist$ethical_trust_diff, breaks=20))), 
+           label = "Pro-China Trust", color = "#d62828", fontface = "bold", hjust = 0) +
+  annotate("text", x = -2, y = max(table(cut(df_hist$ethical_trust_diff, breaks=20))), 
+           label = "Pro-US Trust", color = "#003049", fontface = "bold", hjust = 1)
+
+ggplotly(p_hist_best) %>%
+  layout(margin = list(t = 40, b = 40, l = 50))
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Higher Ethical Trust in China Corresponds to Lower Perceived Privacy Risk"
+
+df_scatter <- analysis_clean %>% drop_na(ethical_trust_diff, privacy_risk)
+
+p_scatter_best <- ggplot(df_scatter, aes(x = ethical_trust_diff, y = privacy_risk)) +
+  geom_point(alpha = 0.8, size = 2.5, aes(color = trust_group, text = paste("Trust Diff:", ethical_trust_diff, "<br>Privacy Risk:", round(privacy_risk, 2)))) +
+  geom_smooth(method = "lm", se = TRUE, color = "#333333", linewidth = 0.8, fill = "#e5e5e5") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "#888888") +
+  scale_color_manual(values = best_trust_palette) +
+  labs(
+    x = "Ethical Trust Difference (China − US)",
+    y = "Perceived Privacy Risk on RedNote",
+    color = "Orientation",
+    subtitle = "Negative correlation indicates users trusting American platforms are more wary of RedNote"
+  ) +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  theme(
+    legend.position = "none",
+    panel.grid.minor = element_blank()
+  )
+
+ggplotly(p_scatter_best, tooltip = "text") %>%
   layout(margin = list(t = 40, b = 40, l = 50))
 ```
