@@ -130,7 +130,7 @@ These news highlights the phenomenon of "TikTok refugees" migrating to RedNote:
 ```{r}
 #| content: valuebox
 #| title: "Migrating Users Surveyed"
-list(icon = "people-fill", color = "white", value = n_participants)
+list(icon = "people-fill", color = "light", value = n_participants)
 ```
 
 ###  {width="25%"}
@@ -138,7 +138,7 @@ list(icon = "people-fill", color = "white", value = n_participants)
 ```{r}
 #| content: valuebox
 #| title: "Dominant Age Cohort"
-list(icon = "person-lines-fill", color = "white", value = age_mode)
+list(icon = "person-lines-fill", color = "light", value = age_mode)
 ```
 
 ###  {width="25%"}
@@ -146,7 +146,7 @@ list(icon = "person-lines-fill", color = "white", value = age_mode)
 ```{r}
 #| content: valuebox
 #| title: "Primary Gender Identity"
-list(icon = "person-badge-fill", color = "white", value = gender_mode)
+list(icon = "person-badge-fill", color = "light", value = gender_mode)
 ```
 
 ###  {width="25%"}
@@ -154,7 +154,7 @@ list(icon = "person-badge-fill", color = "white", value = gender_mode)
 ```{r}
 #| content: valuebox
 #| title: "Geographic Concentration"
-list(icon = "globe-americas", color = "white", value = geo_mode)
+list(icon = "globe-americas", color = "light", value = geo_mode)
 ```
 
 ## Row {.tabset height="500px"}
