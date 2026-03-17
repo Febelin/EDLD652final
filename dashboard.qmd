@@ -289,7 +289,9 @@ ggplotly(p_demo_other, tooltip = c("x", "y")) %>%
   layout(margin = list(t = 30, b = 60, l = 20, r = 20), hovermode = "closest")
 ```
 
-### Best Version {layout-ncol="1"}
+### Best Version
+
+#### Row {height="50%"}
 
 ```{r}
 #| echo: false
@@ -307,8 +309,8 @@ df_pyramid <- analysis_clean |>
     hover_text = paste("Gender: ", Gender, "<br>Count: ", n, sep = "")
   )
 
-# Gender specific sleek palette
-gender_palette <- c("Male" = "#3d5a80", "Female" = "#ee6c4d", "Non-binary" = "#98c1d9", "Prefer not to say" = "#e0fbfc")
+
+gender_palette <- c("Male" = "#3B5BA5", "Female" = "#E07A9A", "Non-binary" = "#8E7DBE", "Prefer not to say" = "#BDBDBD")
 
 p_pyramid <- ggplot(df_pyramid, aes(x = Age, y = n_pyramid, fill = Gender, text = hover_text)) +
   geom_col(alpha = 0.9, width = 0.8) +
@@ -329,70 +331,93 @@ ggplotly(p_pyramid, tooltip = "text") %>%
   config(displayModeBar = FALSE)
 ```
 
+#### Row {height="50%"}
+
 ```{r}
 #| echo: false
 #| message: false
 #| warning: false
-#| title: "Region to Education to Income Flow"
+#| title: "Region Distribution"
 
-# Define node sources
-sankey_nodes <- unique(c(
-  as.character(analysis_clean$source),
-  as.character(analysis_clean$education),
-  as.character(analysis_clean$income)
-)) %>% na.omit()
+df_reg <- analysis_clean |> 
+  count(Region = source) |> 
+  drop_na(Region)
 
-# Define Links Region -> Education
-links_region_edu <- analysis_clean %>%
-  select(source = source, target = education) %>%
-  drop_na() %>%
-  count(source, target) %>%
-  rename(value = n)
+p_reg <- ggplot(df_reg, aes(x = Region, y = n, fill = Region)) +
+  geom_col(alpha = 0.9, width = 0.75) +
+  labs(x = "Region", y = "Users", fill = "Region") +
+  theme_minimal(base_size = 12, base_family = "sans") +
+  theme(
+    axis.text.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_fill_manual(values = colorRampPalette(c("#36506C", "#5D85A6", "#8EB4C6", "#D1E2EE"))(nrow(df_reg)))
 
-# Define Links Education -> Income
-links_edu_inc <- analysis_clean %>%
-  select(source = education, target = income) %>%
-  drop_na() %>%
-  count(source, target) %>%
-  rename(value = n)
-
-# Combine
-sankey_links <- bind_rows(
-  mutate(links_region_edu, source = as.character(source), target = as.character(target)),
-  mutate(links_edu_inc, source = as.character(source), target = as.character(target))
-) %>%
-  mutate(
-    source_id = match(source, sankey_nodes) - 1,
-    target_id = match(target, sankey_nodes) - 1
-  )
-
-# Add matching colors
-sankey_colors <- colorRampPalette(prof_palette_1)(length(sankey_nodes))
-
-p_sankey <- plot_ly(
-    type = "sankey",
-    orientation = "h",
-    node = list(
-      label = sankey_nodes,
-      pad = 15,
-      thickness = 25,
-      line = list(color = "#ffffff", width = 1),
-      color = sankey_colors
-    ),
-    link = list(
-      source = sankey_links$source_id,
-      target = sankey_links$target_id,
-      value = sankey_links$value,
-      color = "rgba(100, 100, 100, 0.2)"
-    )
-  ) %>% 
+ggplotly(p_reg, tooltip = c("x", "y")) %>% 
   layout(
-    margin = list(t = 30, b = 30, l = 30, r = 30),
-    font = list(family = "sans", size = 12, color = "#4a4a4a")
+    legend = list(orientation = "v", x = 1, y = 0.5, bgcolor = "rgba(255,255,255,0.7)"),
+    margin = list(b = 40, r = 120)
   ) %>%
   config(displayModeBar = FALSE)
+```
 
-p_sankey
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Education Distribution"
+
+df_edu <- analysis_clean |> 
+  count(Education = education) |> 
+  drop_na(Education)
+
+p_edu <- ggplot(df_edu, aes(x = Education, y = n, fill = Education)) +
+  geom_col(alpha = 0.9, width = 0.75) +
+  labs(x = "Education Level", y = "Users", fill = "Education") +
+  theme_minimal(base_size = 12, base_family = "sans") +
+  theme(
+    axis.text.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_fill_manual(values = colorRampPalette(c("#487968", "#7AA288", "#ADC7AD", "#DFE9DD"))(nrow(df_edu)))
+
+ggplotly(p_edu, tooltip = c("x", "y")) %>% 
+  layout(
+    legend = list(orientation = "v", x = 1, y = 0.5, bgcolor = "rgba(255,255,255,0.7)"),
+    margin = list(b = 40, r = 120)
+  ) %>%
+  config(displayModeBar = FALSE)
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| title: "Income Distribution"
+
+df_inc <- analysis_clean |> 
+  count(Income = income) |> 
+  drop_na(Income)
+
+p_inc <- ggplot(df_inc, aes(x = Income, y = n, fill = Income)) +
+  geom_col(alpha = 0.9, width = 0.75) +
+  labs(x = "Income Bracket", y = "Users", fill = "Income") +
+  theme_minimal(base_size = 12, base_family = "sans") +
+  theme(
+    axis.text.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  scale_fill_manual(values = colorRampPalette(c("#8A677B", "#B8909D", "#DCBABC", "#F3DFD8", "#FDF1E9"))(nrow(df_inc)))
+
+ggplotly(p_inc, tooltip = c("x", "y")) %>% 
+  layout(
+    legend = list(orientation = "v", x = 1, y = 0.5, bgcolor = "rgba(255,255,255,0.7)"),
+    margin = list(b = 40, r = 120)
+  ) %>%
+  config(displayModeBar = FALSE)
 ```
 
 # Platform Behaviors
@@ -575,7 +600,6 @@ p_behavior_sankey
 #| warning: false
 #| title: "User Journey: Motivation to Activity to Frequency"
 
-# Define mappings
 activities_dict <- c("1" = "Browsing content", "2" = "Posting content", "3" = "Interacting with others", "4" = "Shopping", "5" = "Other Activity")
 reasons_dict <- c("1" = "Similar US platforms unavailable", "2" = "Better content alignment", "3" = "Encouraged by friends/influencers", "4" = "Bypass U.S. restrictions", "5" = "Access unique products/services", "6" = "Curiosity about Chinese platforms", "7" = "Information outside US media", "8" = "Connect to international communities", "9" = "Other Reason")
 
@@ -589,17 +613,14 @@ flow_df <- analysis_clean %>%
   mutate(Activity = activities_dict[str_trim(qid8)]) %>%
   mutate(Frequency = factor(Frequency, levels = c(1, 2, 3, 4), labels = c("Rarely", "A few times per week", "Daily", "Multiple times a day")))
 
-# Nodes
 s_nodes <- unique(c(as.character(flow_df$Reason), as.character(flow_df$Activity), as.character(flow_df$Frequency))) %>% na.omit()
 
-# Links
 s_links <- bind_rows(
   flow_df %>% count(source = Reason, target = Activity) %>% rename(value = n),
   flow_df %>% count(source = Activity, target = as.character(Frequency)) %>% rename(value = n)
 ) %>%
   mutate(source_id = match(source, s_nodes) - 1, target_id = match(target, s_nodes) - 1)
 
-# High-end palette for Sankey nodes
 s_colors <- colorRampPalette(prof_palette_1)(length(s_nodes))
 
 p_behavior_sankey_best <- plot_ly(
@@ -616,7 +637,7 @@ p_behavior_sankey_best <- plot_ly(
       source = s_links$source_id,
       target = s_links$target_id,
       value = s_links$value,
-      color = "rgba(120, 120, 120, 0.1)"  # Lighter and more transparent
+      color = "rgba(120, 120, 120, 0.1)"  
     )
   ) %>% 
   layout(
@@ -651,7 +672,7 @@ reasons_df <- analysis_clean |>
   count(Reason, name = "n") |> 
   mutate(Reason = reorder(Reason, n))
 
-# Sankey-matched colors for Reasons nodes
+
 reason_sankey_palette <- c(
   "Similar US platforms unavailable" = "#E87552",
   "Better content alignment" = "#264653",
@@ -696,7 +717,7 @@ activities_df <- analysis_clean |>
   count(Activity, name = "n") |> 
   mutate(Activity = reorder(Activity, n))
 
-# Sankey-matched colors for Activities nodes
+
 act_sankey_palette <- c(
   "Browsing content" = "#9DA86C",
   "Posting content" = "#E48179",
@@ -738,7 +759,6 @@ df_rn <- analysis_clean |>
     ))
   )
 
-# Sankey-matched colors for Frequency nodes
 freq_sankey_palette <- c(
   "Rarely" = "#A5A973",
   "A few times per week" = "#F3B654",
@@ -764,9 +784,16 @@ ggplotly(p_comp_best, tooltip = c("x", "y")) %>%
 ```
 
 # Trust Analysis
+::: {.callout-note}
+## Measurement note
+This section uses two constructed variables. 
 
+1. **Ethical trust difference** is derived from two 1–5 Likert-scale items: *“I trust US-based platforms more than Chinese platforms in terms of ethical standards”* and *“I trust China-based platforms more than US-based platforms in terms of ethical standards.”* The score is calculated as **China-trust minus US-trust**. Positive values indicate relatively greater trust in China-based platforms, negative values indicate relatively greater trust in US-based platforms, and zero indicates equal trust.
+
+
+2. **Perceived privacy risk** is measured as the mean of six 1–5 Likert-scale items about RedNote, covering hesitation to share personal information, concern about secondary use without consent, concern about sharing with third parties or governments, desire to access collected data, lack of control over data use, and concern that inaccurate data may cause harm. Higher values indicate greater perceived privacy risk.
+:::
 ## Row {.tabset height="600px"}
-
 ### Version 1 {layout-ncol="1"}
 
 ```{r}
@@ -891,7 +918,7 @@ ggplotly(p_hist_v2) %>%
 
 df_hist <- analysis_clean %>% drop_na(ethical_trust_diff, trust_group)
 
-# Define the custom color palette requested by the user
+
 best_trust_palette <- c("Pro-China ethics" = "#d62828", "Pro-US ethics" = "#003049", "Equal trust" = "grey70")
 
 p_hist_best <- ggplot(df_hist, aes(x = ethical_trust_diff, fill = trust_group)) +
