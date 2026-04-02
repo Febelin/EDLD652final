@@ -10,7 +10,7 @@ format:
     nav-buttons:
       - icon: house
         text: Home
-        href: home.html
+        href: index.html
 ---
 
 ```{r}
