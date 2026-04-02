@@ -4,7 +4,6 @@ format:
     theme: [cosmo, custom.scss]
     embed-resources: true
     page-layout: custom
-output-file: index.html
 ---
 
 ```{=html}
