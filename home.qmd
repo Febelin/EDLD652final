@@ -1,0 +1,239 @@
+---
+format: 
+  html:
+    theme: [cosmo, custom.scss]
+    embed-resources: true
+    page-layout: custom
+---
+
+```{=html}
+<style>
+body {
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+}
+.home-header {
+  background-color: #007030;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.home-title {
+  color: #FEE11A;
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.btn-dashboard {
+  background-color: #FEE11A;
+  color: #005624;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+.btn-dashboard:hover {
+  background-color: #e5cb15;
+  color: #005624;
+  text-decoration: none;
+}
+.team-container {
+  display: flex;
+  min-height: 600px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  margin: 40px auto;
+  max-width: 1200px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+.team-sidebar {
+  width: 40%;
+  background-color: transparent;
+  padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #eaeaea;
+}
+.circle-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  margin: 40px 0;
+}
+.team-avatar {
+  position: absolute;
+  --size: 110px;
+  width: var(--size);
+  height: var(--size);
+  top: calc(var(--y) - var(--size) / 2);
+  left: calc(var(--x) - var(--size) / 2);
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 4px solid #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  filter: grayscale(40%) opacity(80%);
+}
+.avatar-1 { --x: 100px; --y: 10px; }
+.avatar-2 { --x: 22px; --y: 145px; }
+.avatar-3 { --x: 178px; --y: 145px; }
+
+.team-avatar:hover {
+  filter: grayscale(0%) opacity(100%);
+  transform: scale(1.05);
+}
+.team-avatar.active {
+  --size: 190px;
+  border-color: #007030;
+  filter: grayscale(0%) opacity(100%);
+  z-index: 10;
+  box-shadow: 0 10px 30px rgba(0, 112, 48, 0.3);
+  transform: scale(1);
+}
+.team-bio-section {
+  width: 65%;
+  padding: 80px 60px;
+  position: relative;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.bio-content {
+  display: none;
+  animation: slideFadeIn 0.6s ease forwards;
+  opacity: 0;
+  transform: translateX(20px);
+}
+.bio-content.active {
+  display: block;
+}
+.bio-name {
+  font-size: 3rem;
+  color: #005624;
+  margin-bottom: 5px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  border-bottom: none !important;
+}
+.bio-role {
+  color: #007030;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 30px;
+  font-weight: 700;
+  border-bottom: 2px solid #FEE11A;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+.bio-text {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: #4a4a4a;
+}
+@keyframes slideFadeIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.intro-container {
+  background-color: #ffffff;
+  border-radius: 12px;
+  margin: 40px auto;
+  max-width: 1200px;
+  padding: 50px 60px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+.intro-container h2 {
+  color: #005624;
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  border-bottom: 3px solid #FEE11A;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+.intro-container h3 {
+  color: #007030;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
+.intro-container p {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #4a4a4a;
+}
+</style>
+
+<div class="home-header">
+  <h2 class="home-title"> TikTok Refugees Project</h2>
+  <a href="dashboard.html" class="btn-dashboard">Go to Dashboard &rarr;</a>
+</div>
+
+<div class="intro-container">
+  <h2>Project Introduction</h2>
+  <p>This study investigates the online community migration of "TikTok Refugees"—users transitioning from the US-based platform TikTok to the China-based platform RedNote. Through a structured survey of 130 participants, this research explores cross-platform migration motivations, application usage patterns, and user privacy perceptions.</p>
+  <h3>Acknowledgements</h3>
+  <p>We gratefully acknowledge the support of the 2025 Consumer Protection Research Grant from the University of Oregon School of Law. We also sincerely thank all participants who generously shared their time and experiences—this project would not have been possible without you.</p>
+</div>
+
+<div class="team-container">
+  <div class="team-sidebar">
+    <div class="circle-container">
+      <img src="member1.png" class="team-avatar avatar-1 active" onclick="showBio(1)" alt="Member 1">
+      <img src="member2.png" class="team-avatar avatar-2" onclick="showBio(2)" alt="Member 2">
+      <img src="member3.png" class="team-avatar avatar-3" onclick="showBio(3)" alt="Member 3">
+    </div>
+  </div>
+  <div class="team-bio-section">
+    <div id="bio-1" class="bio-content active">
+      <h2 class="bio-name">Bryce Clayton Newell</h2>
+      <p class="bio-role">Project Lead</p>
+      <p class="bio-text">Bryce Clayton Newell, PhD, JD, is The David and Nancy Petrone Faculty Fellow and Associate Professor in the School of Journalism and Communication at the University of Oregon. He is an information scientist and socio-legal scholar whose research investigates the social, legal, and ethical implications of information technologies in society.</p>
+    </div>
+    <div id="bio-2" class="bio-content">
+      <h2 class="bio-name">Yanfei Lin</h2>
+      <p class="bio-role">Doctoral Student</p>
+      <p class="bio-text">Yanfei (she/her) is a PhD student in communication and media studies at the University of Oregon. Her research interests include digital media governance, platform power, privacy and data ethics, and the societal impacts of emerging technologies, using mixed and computational methods.</p>
+    </div>
+    <div id="bio-3" class="bio-content">
+      <h2 class="bio-name">Lanore Hahn</h2>
+      <p class="bio-role">Doctoral Student</p>
+      <p class="bio-text">Lanore Hahn is a PhD student in the School of Journalism and Communication at the University of Oregon. Her research examines large language models through critical political economy and care ethics, focusing on how LLMs reshape communication, labor, and relational practices in healthcare systems.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function showBio(id) {
+  // Update avatars
+  document.querySelectorAll('.team-avatar').forEach((img, idx) => {
+    if(idx === id - 1) {
+      img.classList.add('active');
+    } else {
+      img.classList.remove('active');
+    }
+  });
+
+  // Update bios
+  document.querySelectorAll('.bio-content').forEach((bio, idx) => {
+    if(idx === id - 1) {
+      bio.classList.add('active');
+    } else {
+      bio.classList.remove('active');
+    }
+  });
+}
+</script>
+```

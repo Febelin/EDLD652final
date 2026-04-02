@@ -54,3 +54,7 @@ analysis_clean.*
 # data file formats
 *.csv
 *.txt
+
+# images
+*.png
+*.jpg
